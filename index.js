@@ -1,4 +1,7 @@
-const encryptor = require('./encryptor');
+const aesjs = require('aes-js');
+const key = require('./static/key');
+
+const aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
 
 document.querySelector('.btn-download-and-decrypt').onclick = function() {
   let url = '/media-encrypt/sample.gif.enc';
@@ -8,7 +11,7 @@ document.querySelector('.btn-download-and-decrypt').onclick = function() {
     let reader = new FileReader();
     reader.addEventListener('loadend', function() {
       let view = new Uint8Array(this.result);
-      let bytes = encryptor.aesCtr.decrypt(view);
+      let bytes = aesCtr.decrypt(view);
       let el = document.querySelector('#img-dst');
       applyImage(el, 'image/gif', bytes);
     });

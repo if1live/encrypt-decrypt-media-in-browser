@@ -1,7 +1,10 @@
 const aesjs = require('aes-js');
 const path = require('path');
 const fs = require('fs');
-const encryptor = require('./encryptor');
+const key = require('./static/key');
+
+// The counter is optional, and if omitted will begin at 1
+const aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
 
 if(process.argv.length != 4) {
   console.error(`node ${path.basename(__filename)} <input_file> <outout_file>`);
@@ -17,7 +20,7 @@ fs.readFile(inputFile, function(err, data) {
     return;
   }
 
-  var encryptedBytes = encryptor.aesCtr.encrypt(data);
+  var encryptedBytes = aesCtr.encrypt(data);
   fs.writeFile(outputFlie, encryptedBytes, function(err) {
     if(err) {
       console.log(err);
