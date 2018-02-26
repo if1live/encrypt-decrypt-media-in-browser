@@ -6,7 +6,7 @@ var encKey = null;
 document.querySelector('.btn-fetch-enc').onclick = function() {
   var btn = this;
 
-  let url = '/assets/media-encrypt/sample.gif.enc';
+  let url = './assets/media-encrypt/sample.gif.enc';
   fetch(url).then(function(resp) {
     return resp.blob();
   }).then(function(blob) {
@@ -26,7 +26,7 @@ document.querySelector('.btn-fetch-enc').onclick = function() {
 document.querySelector('.btn-fetch-key').onclick = function() {
   var btn = this;
 
-  let url = '/assets/key.json';
+  let url = './assets/key.json';
   fetch(url).then(function(resp) {
     return resp.json();
   }).then(function(json) {
