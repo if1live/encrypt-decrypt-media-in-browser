@@ -1,0 +1,15 @@
+{
+  "name": "encrypt-decrypt-media-in-web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel index.html --out-dir app/"
+  },
+  "dependencies": {
+    "aes-js": "^3.1.0"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.6.2"
+  }
+}
