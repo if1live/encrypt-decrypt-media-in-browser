@@ -26,7 +26,7 @@ class FetchEncButton extends React.Component<any, any> {
   onclick() {
     this.setRunningState();
 
-    let uri = '/assets/media-encrypt/sample.gif.aes128';
+    const uri = this.props.url;
     fetch(uri).then((resp) => {
       return resp.blob();
 
@@ -134,7 +134,7 @@ class ButtonGroup extends React.Component<any, any> {
       <div>
         <h3>{this.props.title}</h3>
         <div>
-          <FetchEncButton setEncrypted={this.props.setEncrypt} />
+          <FetchEncButton setEncrypted={this.props.setEncrypt} url={this.props.dataUrl}/>
           <FetchKeyButton setEncKey={this.props.setEncKey} />
           <DecryptButton decrypt={this.props.decrypt}/>
         </div>
@@ -145,7 +145,7 @@ class ButtonGroup extends React.Component<any, any> {
 
 class SampleApp extends React.Component<any, any> {
   state = {
-    encrypted: undefined,
+    encrypted: new Uint8Array(0),
     encKey: new Uint8Array(0),
     mimetype: 'image/gif',
 
@@ -222,6 +222,28 @@ class SampleApp extends React.Component<any, any> {
     });
   }
 
+  decryptROT13() {
+    const startTime = new Date();
+    const { encKey, encrypted, mimetype } = this.state;
+
+    let decrypted = new Uint8Array(encrypted.length);
+    for (var i = 0 ; i < encrypted.length ; i++) {
+      decrypted[i] = (encrypted[i] + 256 - 13) % 256;
+    }
+    let base64String = btoa(
+      decrypted.reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    let dataURI = this.createDataURI(mimetype, base64String);
+
+    const endTime = new Date();
+    const elapsedTime = endTime.getTime() - startTime.getTime();
+
+    this.setState({
+      src: dataURI,
+      elapsedTime: elapsedTime,
+    });
+  }
+
   isReady() {
     const { encKey, encrypted, mimetype } = this.state;
     return (!!encKey && !!encrypted && !!mimetype);
@@ -236,6 +258,10 @@ class SampleApp extends React.Component<any, any> {
     const setEncKey = this.setEncKey.bind(this);
     const decryptAES128CryptoJS = this.decryptAES128CryptoJS.bind(this);
     const decryptAES128AesJS = this.decryptAES128AesJS.bind(this);
+    const decryptROT13 = this.decryptROT13.bind(this);
+
+    const aes128url = '/assets/media-encrypt/sample.gif.aes128';
+    const rot13url = '/assets/media-encrypt/sample.gif.rot13';
 
     return (
       <div>
@@ -246,12 +272,21 @@ class SampleApp extends React.Component<any, any> {
           setEncrypt={setEncrypt}
           setEncKey={setEncKey}
           decrypt={decryptAES128CryptoJS}
+          dataUrl={aes128url}
         />
         <ButtonGroup
           title="AES-128 (aes-js)"
           setEncrypt={setEncrypt}
           setEncKey={setEncKey}
           decrypt={decryptAES128AesJS}
+          dataUrl={aes128url}
+        />
+        <ButtonGroup
+          title="ROT13"
+          setEncrypt={setEncrypt}
+          setEncKey={setEncKey}
+          decrypt={decryptROT13}
+          dataUrl={rot13url}
         />
       </div>
     );

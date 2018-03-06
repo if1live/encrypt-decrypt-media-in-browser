@@ -5,6 +5,46 @@ const aesjs = require('aes-js');
 
 var text = config.text;
 
+// https://stackoverflow.com/a/34310051
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
+
+function run_text_rot13(text) {
+  // 성능 비교용
+  // text -> byte array
+  let data = new Uint8Array(text.length);
+  for(var i = 0 ; i < data.length ; i++) {
+    data[i] = text.charCodeAt(i);
+  }
+
+  // byte array -> encrypt
+  let encrypted = new Uint8Array(data.length);
+  for(var i = 0 ; i < encrypted.length ; i++) {
+    encrypted[i] = (data[i] + 13) % 256;
+  }
+  let encryptedHex = toHexString(encrypted);
+  console.log(encryptedHex)
+
+
+  // encrypt -> decrypt
+  let decrypted = new Uint8Array(encrypted.length);
+  for(var i = 0 ; i < encrypted.length ; i++) {
+    decrypted[i] = (encrypted[i] + 256 - 13) % 256;
+  }
+  let decryptedHex = toHexString(decrypted);
+
+  // decrypt -> text
+  var buffer = new Array();
+  for(var i = 0 ; i < decrypted.length ; i++) {
+    buffer.push(String.fromCharCode(decrypted[i]));
+  }
+  var output = buffer.join('');
+  console.log(output);
+}
+
 function run_text_with_aes_128_ctr(text) {
   // prepare config
   let counter = new Uint8Array(16);
@@ -61,5 +101,6 @@ function run_text_with_aes_128_ctr_ase_js(text) {
   // "Text may be any length you wish, no padding is required."
 }
 
+run_text_rot13(text);
 run_text_with_aes_128_ctr(text);
 run_text_with_aes_128_ctr_ase_js(text);
