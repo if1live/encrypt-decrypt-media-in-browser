@@ -2,6 +2,7 @@ import * as React from 'react';
 import './App.css';
 import * as CryptoJS from 'crypto-js';
 import * as aesjs from 'aes-js';
+import * as Decryptors from './Decryptors';
 
 class EncryptedImage extends React.Component<any, any> {
   render() {
@@ -171,25 +172,9 @@ class SampleApp extends React.Component<any, any> {
     const startTime = new Date();
     const { encKey, encrypted, mimetype } = this.state;
 
-    // prepare config
-    let counter = new Uint8Array(16);
-    counter[15] = 5;
-    let iv = CryptoJS.lib.WordArray.create(counter);
-
-    var cfg = {
-      mode: CryptoJS.mode.CTR,
-      padding: CryptoJS.pad.NoPadding,
-      iv: iv,
-    };
-
-    // encrypted text -> decrypt
-    let cipher = {
-      ciphertext: CryptoJS.lib.WordArray.create(encrypted),
-    };
-    let key = CryptoJS.lib.WordArray.create(new Uint8Array(encKey));
-    let bytes = CryptoJS.AES.decrypt(cipher, key, cfg);
-    let base64String = bytes.toString(CryptoJS.enc.Base64);
-    let dataURI = this.createDataURI(mimetype, base64String);
+    const aes128 = new Decryptors.AESDecryptorAlter(encKey);
+    const decrypted = aes128.decrypt(encrypted);
+    const dataURI = Decryptors.makeDataURI(mimetype, decrypted);
 
     const endTime = new Date();
     const elapsedTime = endTime.getTime() - startTime.getTime();
@@ -204,14 +189,9 @@ class SampleApp extends React.Component<any, any> {
     const startTime = new Date();
     const { encKey, encrypted, mimetype } = this.state;
 
-    // The counter mode of operation maintains internal state, so to
-    // decrypt a new instance must be instantiated.
-    let aesCtr = new aesjs.ModeOfOperation.ctr(encKey, new aesjs.Counter(5));
-    let decryptedBytes: Uint8Array = aesCtr.decrypt(encrypted);
-    let base64String = btoa(
-      decryptedBytes.reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
-    let dataURI = this.createDataURI(mimetype, base64String);
+    const aes128 = new Decryptors.AESDecryptor(encKey);
+    const decrypted = aes128.decrypt(encrypted);
+    const dataURI = Decryptors.makeDataURI(mimetype, decrypted);
 
     const endTime = new Date();
     const elapsedTime = endTime.getTime() - startTime.getTime();
@@ -226,14 +206,9 @@ class SampleApp extends React.Component<any, any> {
     const startTime = new Date();
     const { encKey, encrypted, mimetype } = this.state;
 
-    let decrypted = new Uint8Array(encrypted.length);
-    for (var i = 0 ; i < encrypted.length ; i++) {
-      decrypted[i] = (encrypted[i] + 256 - 13) % 256;
-    }
-    let base64String = btoa(
-      decrypted.reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
-    let dataURI = this.createDataURI(mimetype, base64String);
+    const rot13 = new Decryptors.ROT13Decryptor();
+    const decrypted = rot13.decrypt(encrypted);
+    const dataURI = Decryptors.makeDataURI(mimetype, decrypted);
 
     const endTime = new Date();
     const elapsedTime = endTime.getTime() - startTime.getTime();

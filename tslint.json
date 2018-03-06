@@ -30,7 +30,6 @@
             "variables-before-functions"
         ],
         "no-arg": true,
-        "no-bitwise": true,
         "no-construct": true,
         "no-duplicate-variable": true,
         "no-empty": true,
