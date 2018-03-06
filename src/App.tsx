@@ -148,7 +148,8 @@ class SampleApp extends React.Component<any, any> {
   state = {
     encrypted: new Uint8Array(0),
     encKey: new Uint8Array(0),
-    mimetype: 'image/gif',
+    // mimetype: 'image/gif',
+    mimetype: 'image/jpg',
 
     elapsedTime: 0,
     src: 'todo',
@@ -235,8 +236,10 @@ class SampleApp extends React.Component<any, any> {
     const decryptAES128AesJS = this.decryptAES128AesJS.bind(this);
     const decryptROT13 = this.decryptROT13.bind(this);
 
-    const aes128url = '/assets/media-encrypt/sample.gif.aes128';
-    const rot13url = '/assets/media-encrypt/sample.gif.rot13';
+    // const aes128url = '/assets/media-encrypt/sample.gif.aes128';
+    // const rot13url = '/assets/media-encrypt/sample.gif.rot13';
+    const aes128url = '/assets/media-encrypt/space.jpg.aes128';
+    const rot13url = '/assets/media-encrypt/space.jpg.rot13';
 
     return (
       <div>
