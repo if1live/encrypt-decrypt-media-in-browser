@@ -3,6 +3,10 @@ import './App.css';
 import * as CryptoJS from 'crypto-js';
 
 class EncryptedImage extends React.Component<any, any> {
+  state = {
+    fired: false,
+  };
+
   isReady() {
     const { encKey, encrypted, mimetype } = this.props;
     return (!!encKey && !!encrypted && !!mimetype);
@@ -42,7 +46,17 @@ class EncryptedImage extends React.Component<any, any> {
 
   render() {
     const {mimetype}  = this.props;
-    const src = this.isReady() ? this.createDataURI() : 'TODO';
+
+    let src = 'TODO';
+    let elapsedTime = 0;
+
+    if (this.isReady()) {
+      const startTime = new Date();
+      src = this.createDataURI();
+      const endTime = new Date();
+      elapsedTime = endTime.getTime() - startTime.getTime();
+    }
+
     return (
       <div>
         <img src={src} />
@@ -53,6 +67,8 @@ class EncryptedImage extends React.Component<any, any> {
           <dd>{typeof(this.props.encrypted)}</dd>
           <dt>isReady</dt>
           <dd>{this.isReady().toString()}</dd>
+          <dt>elapsed time</dt>
+          <dd>{elapsedTime} </dd>
         </dl>
       </div>
     );
