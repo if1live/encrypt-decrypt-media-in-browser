@@ -1,74 +1,16 @@
 import * as React from 'react';
 import './App.css';
 import * as CryptoJS from 'crypto-js';
+import * as aesjs from 'aes-js';
 
 class EncryptedImage extends React.Component<any, any> {
-  state = {
-    fired: false,
-  };
-
-  isReady() {
-    const { encKey, encrypted, mimetype } = this.props;
-    return (!!encKey && !!encrypted && !!mimetype);
-  }
-
-  createDecryptConfig(): CryptoJS.CipherOption {
-    // prepare config
-    let counter = new Uint8Array(16);
-    counter[15] = 5;
-    let iv = CryptoJS.lib.WordArray.create(counter);
-
-    return {
-      mode: CryptoJS.mode.CTR,
-      padding: CryptoJS.pad.NoPadding,
-      iv: iv,
-    };
-  }
-
-  decryptToBase64(): string {
-    // encrypted text -> decrypt
-    const { encKey, encrypted } = this.props;
-
-    let cipher = {
-      ciphertext: CryptoJS.lib.WordArray.create(encrypted),
-    };
-    let cfg = this.createDecryptConfig();
-    let key = CryptoJS.lib.WordArray.create(new Uint8Array(encKey));
-    let bytes = CryptoJS.AES.decrypt(cipher, key, cfg);
-    return bytes.toString(CryptoJS.enc.Base64);
-  }
-
-  createDataURI(): string {
-    const {mimetype}  = this.props;
-    const base64String = this.decryptToBase64();
-    return `data:${mimetype};base64,` + base64String;
-  }
-
   render() {
-    const {mimetype}  = this.props;
-
-    let src = 'TODO';
-    let elapsedTime = 0;
-
-    if (this.isReady()) {
-      const startTime = new Date();
-      src = this.createDataURI();
-      const endTime = new Date();
-      elapsedTime = endTime.getTime() - startTime.getTime();
-    }
-
     return (
       <div>
-        <img src={src} />
+        <img src={this.props.src} />
         <dl>
-          <dt>mimetype</dt>
-          <dd>{mimetype}</dd>
-          <dt>encrypted</dt>
-          <dd>{typeof(this.props.encrypted)}</dd>
-          <dt>isReady</dt>
-          <dd>{this.isReady().toString()}</dd>
           <dt>elapsed time</dt>
-          <dd>{elapsedTime} </dd>
+          <dd>{this.props.elapsedTime}</dd>
         </dl>
       </div>
     );
@@ -84,7 +26,7 @@ class FetchEncButton extends React.Component<any, any> {
   onclick() {
     this.setRunningState();
 
-    let uri = '/assets/media-encrypt/sample.gif.enc';
+    let uri = '/assets/media-encrypt/sample.gif.aes128';
     fetch(uri).then((resp) => {
       return resp.blob();
 
@@ -149,7 +91,7 @@ class FetchKeyButton extends React.Component<any, any> {
 
       this.setState({
         disabled: false,
-        desc: `enc key: ${enckey}`,
+        desc: `enc key: ok`,
       });
       this.props.setEncKey(enckey);
 
@@ -180,47 +122,137 @@ class FetchKeyButton extends React.Component<any, any> {
   }
 }
 
-class DecryptButton extends React.Component {
-  onclick() {
-    console.log('decrypt');
-  }
+class DecryptButton extends React.Component<any, any> {
   render() {
-    return (<button type="button" onClick={this.onclick}>decrypt</button>);
+    return (<button type="button" onClick={this.props.decrypt}>decrypt</button>);
+  }
+}
+
+class ButtonGroup extends React.Component<any, any> {
+  render() {
+    return (
+      <div>
+        <h3>{this.props.title}</h3>
+        <div>
+          <FetchEncButton setEncrypted={this.props.setEncrypt} />
+          <FetchKeyButton setEncKey={this.props.setEncKey} />
+          <DecryptButton decrypt={this.props.decrypt}/>
+        </div>
+      </div>
+    );
   }
 }
 
 class SampleApp extends React.Component<any, any> {
   state = {
     encrypted: undefined,
-    encKey: undefined,
+    encKey: new Uint8Array(0),
     mimetype: 'image/gif',
+
+    elapsedTime: 0,
+    src: 'todo',
   };
 
   setEncKey(key: number[]) {
     this.setState({
       encKey: key,
+      src: 'todo',
     });
   }
 
   setEncrypted(bytes: Uint8Array) {
     this.setState({
       encrypted: bytes,
+      src: 'todo',
     });
+  }
+
+  decryptAES128CryptoJS() {
+    const startTime = new Date();
+    const { encKey, encrypted, mimetype } = this.state;
+
+    // prepare config
+    let counter = new Uint8Array(16);
+    counter[15] = 5;
+    let iv = CryptoJS.lib.WordArray.create(counter);
+
+    var cfg = {
+      mode: CryptoJS.mode.CTR,
+      padding: CryptoJS.pad.NoPadding,
+      iv: iv,
+    };
+
+    // encrypted text -> decrypt
+    let cipher = {
+      ciphertext: CryptoJS.lib.WordArray.create(encrypted),
+    };
+    let key = CryptoJS.lib.WordArray.create(new Uint8Array(encKey));
+    let bytes = CryptoJS.AES.decrypt(cipher, key, cfg);
+    let base64String = bytes.toString(CryptoJS.enc.Base64);
+    let dataURI = this.createDataURI(mimetype, base64String);
+
+    const endTime = new Date();
+    const elapsedTime = endTime.getTime() - startTime.getTime();
+
+    this.setState({
+      src: dataURI,
+      elapsedTime: elapsedTime,
+    });
+  }
+
+  decryptAES128AesJS() {
+    const startTime = new Date();
+    const { encKey, encrypted, mimetype } = this.state;
+
+    // The counter mode of operation maintains internal state, so to
+    // decrypt a new instance must be instantiated.
+    let aesCtr = new aesjs.ModeOfOperation.ctr(encKey, new aesjs.Counter(5));
+    let decryptedBytes: Uint8Array = aesCtr.decrypt(encrypted);
+    let base64String = btoa(
+      decryptedBytes.reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    let dataURI = this.createDataURI(mimetype, base64String);
+
+    const endTime = new Date();
+    const elapsedTime = endTime.getTime() - startTime.getTime();
+
+    this.setState({
+      src: dataURI,
+      elapsedTime: elapsedTime,
+    });
+  }
+
+  isReady() {
+    const { encKey, encrypted, mimetype } = this.state;
+    return (!!encKey && !!encrypted && !!mimetype);
+  }
+
+  createDataURI(mimetype: string, base64String: string): string {
+    return `data:${mimetype};base64,` + base64String;
   }
 
   render() {
     const setEncrypt = this.setEncrypted.bind(this);
     const setEncKey = this.setEncKey.bind(this);
+    const decryptAES128CryptoJS = this.decryptAES128CryptoJS.bind(this);
+    const decryptAES128AesJS = this.decryptAES128AesJS.bind(this);
+
     return (
       <div>
         <h1>decrypt image</h1>
-        <EncryptedImage encKey={this.state.encKey} encrypted={this.state.encrypted} mimetype={this.state.mimetype} />
-        <h2>AES-128</h2>
-        <ul>
-          <li><FetchEncButton setEncrypted={setEncrypt}/></li>
-          <li><FetchKeyButton setEncKey={setEncKey}/></li>
-          <li><DecryptButton /></li>
-        </ul>
+        <EncryptedImage src={this.state.src} elapsedTime={this.state.elapsedTime} />
+        <ButtonGroup
+          title="AES-128 (crypto-js)"
+          setEncrypt={setEncrypt}
+          setEncKey={setEncKey}
+          decrypt={decryptAES128CryptoJS}
+        />
+        <ButtonGroup
+          title="AES-128 (aes-js)"
+          setEncrypt={setEncrypt}
+          setEncKey={setEncKey}
+          decrypt={decryptAES128AesJS}
+        />
       </div>
     );
   }
