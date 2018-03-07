@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
 import './App.css';
 import * as CryptoJS from 'crypto-js';
 import * as aesjs from 'aes-js';
@@ -279,4 +280,15 @@ class App extends React.Component {
   }
 }
 
-export default App;
+const Root = () => {
+  return (
+    <BrowserRouter >
+      <div>
+        <Route path="/" component={App} />
+      </div>
+    </BrowserRouter>
+  );
+};
+
+//export default App;
+export default Root;

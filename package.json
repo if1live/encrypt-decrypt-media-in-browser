@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/react-router": "^4.0.22",
+    "@types/react-router-dom": "^4.2.4",
     "aes-js": "^3.1.0",
     "crypto-js": "^3.1.9-1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
     "react-scripts-ts": "2.13.0"
   },
   "scripts": {
