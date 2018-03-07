@@ -84,7 +84,7 @@ class FetchKeyButton extends React.Component<any, any> {
   onclick() {
     this.setRunningState();
 
-    let uri = '/assets/key.json';
+    let uri = './assets/key.json';
     fetch(uri).then((resp) => {
       return resp.json();
 
@@ -237,10 +237,10 @@ class SampleApp extends React.Component<any, any> {
     const decryptAES128AesJS = this.decryptAES128AesJS.bind(this);
     const decryptROT13 = this.decryptROT13.bind(this);
 
-    // const aes128url = '/assets/media-encrypt/sample.gif.aes128';
-    // const rot13url = '/assets/media-encrypt/sample.gif.rot13';
-    const aes128url = '/assets/media-encrypt/space.jpg.aes128';
-    const rot13url = '/assets/media-encrypt/space.jpg.rot13';
+    // const aes128url = './assets/media-encrypt/sample.gif.aes128';
+    // const rot13url = './assets/media-encrypt/sample.gif.rot13';
+    const aes128url = './assets/media-encrypt/space.jpg.aes128';
+    const rot13url = './assets/media-encrypt/space.jpg.rot13';
 
     return (
       <div>

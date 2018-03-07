@@ -64,4 +64,6 @@ typings/
 ## custom
 dist/*
 app/*
+build/*
+docs/build
 .cache
